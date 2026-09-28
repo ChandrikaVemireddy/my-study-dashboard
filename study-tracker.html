@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Study Work Tracker</title>
+<style>
+:root{--bg:#0b0d12;--card:#141820;--line:#282e3a;--text:#f5f7fb;--muted:#9299a8;--accent:#8b5cf6;--green:#22c55e;--red:#ef4444}
+body.theme-ocean{--bg:#07131f;--card:#0d1d2b;--line:#1d3a50;--text:#edf9ff;--muted:#8eabbc;--accent:#06b6d4;--green:#22c55e}
+body.theme-emerald{--bg:#07120e;--card:#0d1c15;--line:#1d3b2b;--text:#effff5;--muted:#8eab9a;--accent:#10b981;--green:#34d399}
+body.theme-sunset{--bg:#180d0a;--card:#24130f;--line:#4a2820;--text:#fff7f2;--muted:#b99a8c;--accent:#f97316;--green:#22c55e}
+body.theme-rose{--bg:#170b13;--card:#24101c;--line:#482338;--text:#fff5fa;--muted:#b99aa9;--accent:#ec4899;--green:#22c55e}
+body.theme-light{--bg:#f4f6fa;--card:#fff;--line:#dce1e9;--text:#18202c;--muted:#687386;--accent:#6d4aff;--green:#16a34a}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font-family:Arial,Helvetica,sans-serif}
+.container{max-width:1100px;margin:auto;padding:28px 18px}
+header{display:flex;justify-content:space-between;align-items:center;gap:15px;margin-bottom:24px}
+h1{margin:0;font-size:28px}h2{font-size:19px;margin:0 0 15px}.muted{color:var(--muted)}
+button,input,textarea{font:inherit}button{cursor:pointer}
+.btn{border:1px solid var(--line);background:#1b202a;color:#fff;border-radius:9px;padding:9px 13px}.primary{background:var(--accent);border-color:var(--accent)}
+.date{display:flex;align-items:center;gap:7px}.date span{min-width:145px;text-align:center;font-weight:bold}
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:24px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px}
+.stat small{display:block;color:var(--muted);font-size:11px;text-transform:uppercase}.stat strong{display:block;font-size:25px;margin-top:7px}
+.subjects{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
+.subject{transition:.15s}.subject.done{border-color:#247340}
+.subject-top{display:flex;align-items:center;gap:11px}.check{width:30px;height:30px;border-radius:8px;border:1px solid #444b59;background:#191e27;color:#fff;font-weight:bold}
+.done .check{background:var(--green);border-color:var(--green)}
+.subject-name{font-weight:bold;font-size:17px}.target{font-size:11px;color:var(--muted);margin-top:3px}
+.remove{margin-left:auto;border:0;background:none;color:#6e7686;font-size:18px}
+.row{display:grid;grid-template-columns:130px 1fr;gap:10px;margin-top:14px;align-items:center}
+label{font-size:12px;color:var(--muted)}input,textarea{width:100%;background:#0d1016;color:#fff;border:1px solid var(--line);border-radius:8px;padding:9px;outline:none}
+.topics{margin-top:9px}.topics input{font-size:12px}.chips{display:flex;flex-wrap:wrap;gap:5px;margin-top:8px}
+.chip{font-size:11px;padding:4px 7px;border-radius:99px;background:#8b5cf61a;border:1px solid #8b5cf633;color:#cfc4ff;cursor:pointer}
+.progress-wrap{margin:22px 0}.progress-line{height:10px;background:#252b35;border-radius:99px;overflow:hidden}.progress-line span{display:block;height:100%;background:var(--accent);width:0}
+.note{margin-top:18px}.note textarea{min-height:90px;resize:vertical;margin-bottom:9px}
+.history{margin-top:24px}.history-row{display:grid;grid-template-columns:1.4fr 1fr 1fr;padding:12px;border-bottom:1px solid var(--line);font-size:13px}
+.manage{margin-top:24px}.add{display:grid;grid-template-columns:1fr 1fr auto;gap:8px}
+.small{font-size:11px;color:var(--muted)}.empty{text-align:center;color:var(--muted);padding:20px}
+.calendar-card{margin-top:24px}
+.calendar-head{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:14px}
+.calendar-title{font-weight:bold;font-size:17px}
+.calendar-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:6px}
+.calendar-weekday{text-align:center;color:var(--muted);font-size:10px;text-transform:uppercase;padding:5px 0}
+.cal-day{min-height:58px;border:1px solid var(--line);border-radius:9px;background:#0d1016;padding:7px;position:relative;cursor:pointer}
+body.theme-light .cal-day{background:#f8fafc}
+.cal-day:hover{border-color:var(--accent)}
+.cal-day.empty-day{background:transparent;border-color:transparent;cursor:default}
+.cal-day .num{font-size:12px;font-weight:bold}
+.cal-day .status{font-size:9px;margin-top:8px;color:var(--muted)}
+.cal-day.worked{border-color:#247340;background:#102218}
+.cal-day.partial{border-color:#a16207;background:#241b0c}
+body.theme-light .cal-day.worked{background:#ecfdf3}
+body.theme-light .cal-day.partial{background:#fffbeb}
+.cal-day.today{box-shadow:0 0 0 2px var(--accent) inset}
+.cal-day.selected{outline:2px solid var(--accent);outline-offset:1px}
+.calendar-legend{display:flex;gap:14px;align-items:center;margin-top:12px;color:var(--muted);font-size:11px;flex-wrap:wrap}
+.legend-dot{width:10px;height:10px;border-radius:3px;display:inline-block;margin-right:4px;vertical-align:-1px}
+.dot-worked{background:var(--green)}.dot-partial{background:#d97706}.dot-none{background:#303744}
+@media(max-width:700px){.stats{grid-template-columns:repeat(2,1fr)}.subjects{grid-template-columns:1fr}.add{grid-template-columns:1fr}.header{display:block}.date{margin-top:12px}}
+</style>
+</head>
+<body>
+<div class="container">
+<header>
+  <div>
+    <div class="small">DAILY STUDY TRACKER</div>
+    <h1>Track the work. Nothing complicated.</h1>
+    <div class="muted">Tick it. Log time. Record what you studied.</div>
+  </div>
+  <div style="display:flex;align-items:center;gap:9px;flex-wrap:wrap;justify-content:flex-end">
+    <label for="themeSelect" class="small">THEME</label>
+    <select id="themeSelect" class="btn" onchange="setTheme(this.value)" style="padding:9px 11px">
+      <option value="default">Midnight</option>
+      <option value="ocean">Ocean</option>
+      <option value="emerald">Emerald</option>
+      <option value="sunset">Sunset</option>
+      <option value="rose">Rose</option>
+      <option value="light">Light</option>
+    </select>
+    <div class="date">
+    <button class="btn" onclick="changeDate(-1)">‹</button>
+    <span id="dateLabel"></span>
+    <button class="btn" onclick="changeDate(1)">›</button>
+    <button class="btn" onclick="goToday()">Today</button>
+    </div>
+  </div>
+</header>
+
+<div class="stats">
+  <div class="card stat"><small>Completed</small><strong id="completed">0 / 6</strong></div>
+  <div class="card stat"><small>Completion</small><strong id="percent">0%</strong></div>
+  <div class="card stat"><small>Time today</small><strong id="time">0m</strong></div>
+  <div class="card stat"><small>Topics</small><strong id="topicCount">0</strong></div>
+</div>
+
+<div class="card progress-wrap">
+  <div style="display:flex;justify-content:space-between;margin-bottom:8px"><b>Today's progress</b><span id="progressText" class="muted">0%</span></div>
+  <div class="progress-line"><span id="progressBar"></span></div>
+</div>
+
+<h2>Today's work</h2>
+<div id="subjects" class="subjects"></div>
+
+<div class="card note">
+  <h2>Daily note</h2>
+  <textarea id="note" placeholder="What did you learn? What should you revise tomorrow?"></textarea>
+  <button class="btn primary" onclick="saveNote()">Save note</button>
+</div>
+
+<div class="manage">
+<h2>Subjects</h2>
+<div class="card">
+  <div class="add">
+    <input id="newName" placeholder="Subject name e.g. System Design">
+    <input id="newTarget" placeholder="Target e.g. 1h/day">
+    <button class="btn primary" onclick="addSubject()">+ Add</button>
+  </div>
+  <p class="small">You can add or remove subjects whenever your preparation changes.</p>
+</div>
+</div>
+
+<div class="card calendar-card">
+  <div class="calendar-head">
+    <div>
+      <div class="small">CONSISTENCY CALENDAR</div>
+      <div class="calendar-title" id="calendarTitle"></div>
+    </div>
+    <div style="display:flex;gap:7px">
+      <button class="btn" onclick="changeMonth(-1)">‹</button>
+      <button class="btn" onclick="goCurrentMonth()">Today</button>
+      <button class="btn" onclick="changeMonth(1)">›</button>
+    </div>
+  </div>
+  <div class="calendar-grid" id="calendar"></div>
+  <div class="calendar-legend">
+    <span><i class="legend-dot dot-worked"></i>Work done</span>
+    <span><i class="legend-dot dot-partial"></i>Partial</span>
+    <span><i class="legend-dot dot-none"></i>No work</span>
+    <span>Click a day to open it</span>
+  </div>
+</div>
+
+<div class="history">
+<h2>Recent history</h2>
+<div class="card" id="history"></div>
+</div>
+</div>
+
+<script>
+const KEY="simple-study-tracker-v1";
+let state=JSON.parse(localStorage.getItem(KEY)||"null")||{
+ subjects:[
+  {id:crypto.randomUUID(),name:"DSA",target:"2h/day"},
+  {id:crypto.randomUUID(),name:"Aptitude",target:"1h/day"},
+  {id:crypto.randomUUID(),name:"SQL",target:"1h/day"},
+  {id:crypto.randomUUID(),name:"DBMS",target:"45m/day"},
+  {id:crypto.randomUUID(),name:"OS",target:"45m/day"},
+  {id:crypto.randomUUID(),name:"CN",target:"45m/day"}
+ ],
+ days:{}
+};
+let current=new Date(); current.setHours(12,0,0,0);
+let calendarMonth=new Date(current.getFullYear(),current.getMonth(),1);
+let settings=JSON.parse(localStorage.getItem(KEY+"-settings")||"null")||{theme:"default"};
+
+function applyTheme(){
+  document.body.className=settings.theme==="default"?"":"theme-"+settings.theme;
+  const select=document.getElementById("themeSelect");
+  if(select) select.value=settings.theme;
+}
+function setTheme(theme){
+  settings.theme=theme; localStorage.setItem(KEY+"-settings",JSON.stringify(settings)); applyTheme();
+}
+
+function key(){return current.toISOString().slice(0,10)}
+function getDay(){return state.days[key()] ||= {logs:{},note:""}}
+function save(){localStorage.setItem(KEY,JSON.stringify(state))}
+function dateText(){
+ document.getElementById("dateLabel").textContent=current.toLocaleDateString(undefined,{weekday:"short",month:"short",day:"numeric",year:"numeric"});
+}
+function minutesText(n){n=Number(n)||0;let h=Math.floor(n/60),m=n%60;return h?(h+"h "+(m?m+"m":"")):m+"m"}
+function changeDate(n){current.setDate(current.getDate()+n);render()}
+function goToday(){current=new Date();current.setHours(12,0,0,0);render()}
+
+function toggle(id){
+ let d=getDay(); d.logs[id] ||= {done:false,minutes:0,topics:[]}; d.logs[id].done=!d.logs[id].done; save(); render();
+}
+function setMinutes(id,value){
+ let d=getDay(); d.logs[id] ||= {done:false,minutes:0,topics:[]}; d.logs[id].minutes=Math.max(0,Number(value)||0); save(); renderStats();
+}
+function addTopic(id,input){
+ let value=input.value.trim(); if(!value)return;
+ let d=getDay(); d.logs[id] ||= {done:false,minutes:0,topics:[]};
+ d.logs[id].topics.push(value); input.value=""; save(); render();
+}
+function removeTopic(id,index){getDay().logs[id].topics.splice(index,1);save();render()}
+function saveNote(){getDay().note=document.getElementById("note").value;save();alert("Note saved for "+key())}
+
+function addSubject(){
+ let name=document.getElementById("newName").value.trim(); if(!name)return;
+ state.subjects.push({id:crypto.randomUUID(),name,target:document.getElementById("newTarget").value.trim()||"Flexible"});
+ document.getElementById("newName").value="";document.getElementById("newTarget").value="";save();render();
+}
+function removeSubject(id){
+ if(!confirm("Remove this subject from your tracker? Old daily records are kept."))return;
+ state.subjects=state.subjects.filter(s=>s.id!==id);save();render();
+}
+
+function renderStats(){
+ let d=getDay(), done=0,total=0,topics=0;
+ state.subjects.forEach(s=>{let l=d.logs[s.id]||{};if(l.done)done++;total+=Number(l.minutes)||0;topics+=(l.topics||[]).length});
+ let pct=state.subjects.length?Math.round(done/state.subjects.length*100):0;
+ document.getElementById("completed").textContent=done+" / "+state.subjects.length;
+ document.getElementById("percent").textContent=pct+"%";
+ document.getElementById("time").textContent=minutesText(total);
+ document.getElementById("topicCount").textContent=topics;
+ document.getElementById("progressText").textContent=pct+"%";
+ document.getElementById("progressBar").style.width=pct+"%";
+}
+
+function renderSubjects(){
+ let d=getDay(), box=document.getElementById("subjects");
+ box.innerHTML=state.subjects.map(s=>{
+   let l=d.logs[s.id]||{done:false,minutes:0,topics:[]};
+   return `<div class="card subject ${l.done?"done":""}">
+    <div class="subject-top">
+      <button class="check" onclick="toggle('${s.id}')">${l.done?"✓":""}</button>
+      <div><div class="subject-name">${esc(s.name)}</div><div class="target">Target: ${esc(s.target)}</div></div>
+      <button class="remove" onclick="removeSubject('${s.id}')" title="Remove subject">×</button>
+    </div>
+    <div class="row"><label>Minutes spent</label><input type="number" min="0" step="5" value="${l.minutes||0}" onchange="setMinutes('${s.id}',this.value)"></div>
+    <div class="topics"><input placeholder="Add topic and press Enter" onkeydown="if(event.key==='Enter'){addTopic('${s.id}',this)}"></div>
+    <div class="chips">${(l.topics||[]).map((t,i)=>`<span class="chip" onclick="removeTopic('${s.id}',${i})">${esc(t)} ×</span>`).join("")}</div>
+   </div>`
+ }).join("");
+}
+
+function renderHistory(){
+ let box=document.getElementById("history"), keys=Object.keys(state.days).sort().reverse().slice(0,14);
+ if(!keys.length){box.innerHTML='<div class="empty">Your history will appear here after you start logging.</div>';return}
+ box.innerHTML=keys.map(k=>{
+   let d=state.days[k],done=state.subjects.filter(s=>d.logs[s.id]?.done).length;
+   let mins=state.subjects.reduce((a,s)=>a+(Number(d.logs[s.id]?.minutes)||0),0);
+   let topics=state.subjects.reduce((a,s)=>a+(d.logs[s.id]?.topics||[]).length,0);
+   return `<div class="history-row"><b>${new Date(k+"T12:00:00").toLocaleDateString(undefined,{weekday:"short",month:"short",day:"numeric"})}</b><span>${done}/${state.subjects.length} completed</span><span>${minutesText(mins)} · ${topics} topics</span></div>`
+ }).join("");
+}
+function dayStatus(k){
+  const d=state.days[k];
+  if(!d)return "none";
+  const logs=Object.values(d.logs||{});
+  const worked=logs.some(l=>(l.done||Number(l.minutes)>0||(l.topics||[]).length>0));
+  if(!worked)return "none";
+  const completed=state.subjects.length?state.subjects.filter(s=>d.logs[s.id]?.done).length:0;
+  if(completed===state.subjects.length && state.subjects.length>0)return "worked";
+  return "partial";
+}
+function changeMonth(n){
+  calendarMonth=new Date(calendarMonth.getFullYear(),calendarMonth.getMonth()+n,1);
+  renderCalendar();
+}
+function goCurrentMonth(){
+  calendarMonth=new Date(current.getFullYear(),current.getMonth(),1);
+  renderCalendar();
+}
+function openCalendarDay(y,m,d){
+  current=new Date(y,m,d,12,0,0,0);
+  render();
+  window.scrollTo({top:0,behavior:"smooth"});
+}
+function renderCalendar(){
+  const box=document.getElementById("calendar");
+  const title=document.getElementById("calendarTitle");
+  if(!box||!title)return;
+  const y=calendarMonth.getFullYear(), m=calendarMonth.getMonth();
+  title.textContent=calendarMonth.toLocaleDateString(undefined,{month:"long",year:"numeric"});
+  const weekdays=["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
+  let out=weekdays.map(x=>`<div class="calendar-weekday">${x}</div>`).join("");
+  const first=new Date(y,m,1).getDay();
+  const days=new Date(y,m+1,0).getDate();
+  for(let i=0;i<first;i++)out+='<div class="cal-day empty-day"></div>';
+  for(let d=1;d<=days;d++){
+    const k=`${y}-${String(m+1).padStart(2,"0")}-${String(d).padStart(2,"0")}`;
+    const status=dayStatus(k);
+    const isToday=new Date().toISOString().slice(0,10)===k;
+    const isSelected=key()===k;
+    const label=status==="worked"?"Done":status==="partial"?"Partial":"No work";
+    out+=`<div class="cal-day ${status} ${isToday?"today":""} ${isSelected?"selected":""}" onclick="openCalendarDay(${y},${m},${d})">
+      <div class="num">${d}</div><div class="status">${label}</div>
+    </div>`;
+  }
+  box.innerHTML=out;
+}
+function render(){
+ dateText();let d=getDay();document.getElementById("note").value=d.note||"";
+ renderStats();renderSubjects();renderHistory();renderCalendar();
+}
+function esc(s){return String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[c]))}
+applyTheme();
+render();
+</script>
+</body>
+</html>
